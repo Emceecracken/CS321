@@ -1,109 +1,106 @@
-import java.io.DataInputStream;
+import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Queue;
 
 public class Parser {
 
-	private static final char EOF = 0;
-	//FileInputStream gbf;
+	private static boolean EOF = false;
 	int length; // length of subsequence
-	Queue geneSave;
+	myQueue geneSave;
 	boolean firstTime;
-	DataInputStream d;
+	BufferedReader b;
 
-	public Parser(FileInputStream file, int subLength) {
+	public Parser(BufferedReader in, int subLength) {
 
-		//gbf = file;
-		d = new DataInputStream(file);
+		b = in;
+
 		length = subLength;
-		geneSave = new LinkedList<Character>();
+		geneSave = new myQueue();
 		firstTime = true;
 	}
 
 	String nextSubsequence() {
 
-//		if (firstTime) {
-//			skipHeader();
-//			firstTime = false;
-//		}
+		if (firstTime) {
+			skipHeader();
+			firstTime = false;
+		}
 
 		char g;
-		String ss = null;
+		String ss = "";
 
 		try {
-			while ((g = (char)d.readByte()) != EOF) {
+			while (!EOF) {
+				g = (char) b.read();
 				checkGene(g);
-				ss = geneSave.toString();
+				ss = geneSave.getSubsequence();
+
+
 				if (ss.contains("n") || ss.contains("N")) {
 					for (int i = 0; i < ss.length(); i++) {
-						geneSave.remove();
+						geneSave.poll();
 					}
 				}
-
-				System.out.println(ss.length());
-				
 				if (ss.length() == length) {
 					geneSave.remove();
 					return ss;
-				}				
+				}
 
 			}
-			d.close();			
+			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		
 		return null;
-
+		
 	}
 
-	String getSubsequence(String k) {
+	void checkGene(char check) {
 
-		String ss = k;
-		return ss;
-	}
+		if (Character.isUpperCase(check)){
+            Character.toLowerCase(check);
 
-	char checkGene(char check) {
-
+        }
+		
 		if (check == 'a' || check == 'c' || check == 't' || check == 'g' || check == 'n' || check == 'N') {
 
 			geneSave.add(check);
 		} else if (check == '/') {
 			try {
-				if ((char)d.readByte() == '/') {
+				if (b.read() == '/') {
 
-					check = EOF;
-					firstTime = true;
+					EOF = true;
 				}
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+
 				e.printStackTrace();
 			}
 		}
-		return check;
 
 	}
 
 	void skipHeader() {
-		char temp;
+		
+		char c;
 		try {
-			while((temp = d.readChar()) != EOF){
-				System.out.println(temp);
-				if(temp == 'O'){
-					temp = d.readChar();
-					if(temp == 'R'){
-						temp = d.readChar();
-						if(temp == 'I'){
-							temp = d.readChar();
-							if(temp == 'G'){
-								temp = d.readChar();
-								if(temp == 'I'){
-									temp = d.readChar();
-									if(temp == 'N'){
+			while(!EOF){
+				c = (char) b.read();
+				if(c == 'O'){
+					c = (char) b.read();
+					if(c == 'R'){
+						c = (char) b.read();
+						if(c == 'I'){
+							c = (char) b.read();
+							if(c == 'G'){
+								c = (char) b.read();
+								if(c == 'I'){
+									c = (char) b.read();
+									if(c == 'N'){
+										c = (char) b.read();
 										break;
 									}
 								}
@@ -111,14 +108,37 @@ public class Parser {
 						}
 					}
 				}
-				
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+
 			e.printStackTrace();
 		}
-		
 
+	}
+	
+	public class myQueue extends LinkedList<Character> {
+		
+		public String getSubsequence(){
+			
+			String str = "";
+			
+			Iterator<Character> itr; 
+			itr = geneSave.iterator();
+			
+			int count = 0;
+			
+			while(count < length){
+				
+				if(itr.hasNext()){
+					str += itr.next();
+				}else{
+					break;
+				}
+			}
+			
+			return str;
+			
+		}
 	}
 
 }
