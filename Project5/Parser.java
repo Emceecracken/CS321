@@ -7,16 +7,15 @@ import java.util.Queue;
 
 public class Parser {
 
-	private static boolean EOF = false;
-	int length; // length of subsequence
-	myQueue geneSave;
-	boolean firstTime;
+	private static boolean EOF = false;		// Condition for end of file
+	int length; 							// Length of the gene subsequence
+	myQueue geneSave;						// Queue used for saving the gene sequences
+	boolean firstTime;						// Condition used to skip everything unimportant
 	BufferedReader b;
 
 	public Parser(BufferedReader in, int subLength) {
 
-		b = in;
-
+		b = in;								// Initializes all the class variables
 		length = subLength;
 		geneSave = new myQueue();
 		firstTime = true;
@@ -24,28 +23,30 @@ public class Parser {
 
 	String nextSubsequence() {
 
-		if (firstTime) {
-			skipHeader();
+		if (firstTime) {					// Skips the unimportant stuff until "ORIGIN" is found
+			skipHeader();	
 			firstTime = false;
 		}
 
-		char g;
+		char gene;							// Variables used to create the subsequence
+		int geneInt;
 		String ss = "";
 
-		try {
-			while (!EOF) {
-				g = (char) b.read();
-				checkGene(g);
-				ss = geneSave.getSubsequence();
+		try {								// Try-catch for bufferedreader.read()
+			while ((geneInt =  b.read()) != -1) {				// Keeps reading until read() returns -1 (END OF FILE)
+				gene = (char) geneInt;							// Casts the read into a character
+				checkGene(gene);								// Checks if the gene is valid
+				ss = geneSave.getSubsequence();					// Copies the queue into a string
 
-
-				if (ss.contains("n") || ss.contains("N")) {
+				if (ss.contains("n") || ss.contains("N")) {		// Gets rid of the queue and string if it contains 'n'
 					for (int i = 0; i < ss.length(); i++) {
 						geneSave.poll();
+						ss = "";
 					}
 				}
-				if (ss.length() == length) {
-					geneSave.remove();
+				
+				if (ss.length() == length) {					// Returns the subsequence (ss) if it has the correct length
+					geneSave.poll();							// Removes the head of the queue so that 
 					return ss;
 				}
 
@@ -59,21 +60,18 @@ public class Parser {
 		
 	}
 
-	void checkGene(char check) {
+	void checkGene(char input) {
 
-		if (Character.isUpperCase(check)){
-            Character.toLowerCase(check);
+		char check = Character.toLowerCase(input);
 
-        }
-		
-		if (check == 'a' || check == 'c' || check == 't' || check == 'g' || check == 'n' || check == 'N') {
+		if (check == 'a' || check == 'c' || check == 't' || check == 'g' || check == 'n') {
 
 			geneSave.add(check);
+			
 		} else if (check == '/') {
 			try {
 				if (b.read() == '/') {
-
-					EOF = true;
+					firstTime = true;
 				}
 			} catch (IOException e) {
 
@@ -84,23 +82,21 @@ public class Parser {
 	}
 
 	void skipHeader() {
-		
-		char c;
+
 		try {
-			while(!EOF){
-				c = (char) b.read();
-				if(c == 'O'){
-					c = (char) b.read();
-					if(c == 'R'){
-						c = (char) b.read();
-						if(c == 'I'){
-							c = (char) b.read();
-							if(c == 'G'){
-								c = (char) b.read();
-								if(c == 'I'){
-									c = (char) b.read();
-									if(c == 'N'){
-										c = (char) b.read();
+			while(b.read() != -1){
+				if(b.read() == 'O'){
+					
+					if(b.read() == 'R'){
+						
+						if(b.read() == 'I'){
+							
+							if(b.read() == 'G'){
+								
+								if(b.read() == 'I'){
+									
+									if(b.read() == 'N'){
+										
 										break;
 									}
 								}

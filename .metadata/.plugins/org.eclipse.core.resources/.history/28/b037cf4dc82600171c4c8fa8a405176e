@@ -1,0 +1,141 @@
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Queue;
+
+public class Parser {
+
+	private static boolean EOF = false;		// Condition for end of file
+	int length; 							// Length of the gene subsequence
+	myQueue geneSave;						// Queue used for saving the gene sequences
+	boolean firstTime;						// Condition used to skip everything unimportant
+	BufferedReader b;
+
+	public Parser(BufferedReader in, int subLength) {
+
+		b = in;								// Initializes all the class variables
+		length = subLength;
+		geneSave = new myQueue();
+		firstTime = true;
+	}
+
+	String nextSubsequence() {
+
+		if (firstTime) {					// Skips the unimportant stuff until "ORIGIN" is found
+			skipHeader();	
+			firstTime = false;
+		}
+
+		char gene;							// Variables used to create the subsequence
+		String ss = "";
+
+		try {								// Try-catch for bufferedreader.read()
+			while ((gene = (char) b.read()) != -1) {					// Keeps reading un
+				gene = (char) b.read();
+				checkGene(gene);
+				ss = geneSave.getSubsequence();
+
+
+				if (ss.contains("n") || ss.contains("N")) {
+					for (int i = 0; i < ss.length(); i++) {
+						geneSave.poll();
+						ss = "";
+					}
+				}
+				if (ss.length() == length) {
+					geneSave.poll();
+					return ss;
+				}
+
+			}
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		return null;
+		
+	}
+
+	void checkGene(char input) {
+
+		char check = Character.toLowerCase(input); 	// DOES IT NEED TO HAVE THE SAME CASE WHEN YOU INPUT IT
+													// EX: cAt -> cat OR cAt -> CAT OR cAt -> cAt
+		if (check == 'a' || check == 'c' || check == 't' || check == 'g' || check == 'n') {
+
+			geneSave.add(check);
+		} else if (check == '/') {
+			try {
+				if (b.read() == '/') {
+					firstTime = true;
+					if(b.read() == -1){
+						EOF = true;
+					}
+				}
+			} catch (IOException e) {
+
+				e.printStackTrace();
+			}
+		}
+
+	}
+
+	void skipHeader() {
+
+		try {
+			while(!EOF){
+				if(b.read() == 'O'){
+					
+					if(b.read() == 'R'){
+						
+						if(b.read() == 'I'){
+							
+							if(b.read() == 'G'){
+								
+								if(b.read() == 'I'){
+									
+									if(b.read() == 'N'){
+										
+										break;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		} catch (IOException e) {
+
+			e.printStackTrace();
+		}
+
+	}
+	
+	public class myQueue extends LinkedList<Character> {
+		
+		public String getSubsequence(){
+			
+			String str = "";
+			
+			Iterator<Character> itr; 
+			itr = geneSave.iterator();
+			
+			int count = 0;
+			
+			while(count < length){
+				
+				if(itr.hasNext()){
+					str += itr.next();
+				}else{
+					break;
+				}
+			}
+			
+			return str;
+			
+		}
+	}
+
+}
