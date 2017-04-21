@@ -1,3 +1,4 @@
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -81,6 +82,7 @@ public class Parser {
 
 	}
 
+	//need to check if file starts origin or origin right after //
 	void skipHeader() {
 
 		try {
