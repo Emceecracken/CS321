@@ -8,7 +8,7 @@ import java.io.InputStream;
 public class GeneBankCreateBTree {
 	
 	private static int degree;
-	private static File gbk;
+	private static File gbf;
 	private static int sequenceLength;
 	private static int debugLevel;
 	
@@ -20,11 +20,11 @@ public class GeneBankCreateBTree {
 		}
 		if (args.length == 4){
 			degree = Integer.parseInt(args[0]);
-			gbk = new File (args[1]);
+			gbf = new File(args[1]);
 			sequenceLength = Integer.parseInt(args[2]);
 			debugLevel = Integer.parseInt(args[3]);
 			
-			System.out.println(degree + " " + gbk + " " + sequenceLength + " " + debugLevel);
+			System.out.println(degree + " " + gbf + " " + sequenceLength + " " + debugLevel);
 			
 		}
 		
@@ -40,12 +40,14 @@ public class GeneBankCreateBTree {
 				
 				long key;
 				key = stringToKey(str);
-				b.insert(key);
+				TreeObject newObj = new TreeObject(key);
+				b.insert(newObj);
 				
-				System.out.println(key + "  " + str);
+			//	System.out.println(key + "  " + str);
 			}
 		}catch (Exception e){
-			System.out.println("Cannot open file");
+			e.printStackTrace();
+
 		}
 
 	}

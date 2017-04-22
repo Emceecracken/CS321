@@ -1,20 +1,22 @@
+import java.io.Serializable;
 
-public class TreeObject<T> {
+public class TreeObject implements Serializable{
 	
-	private T key;
+	private long key;
 	private int frequencyCount;
 	
-	public TreeObject(T a){	
-		key = a;
+	public TreeObject(long key){	
+		this.key = key;
 		frequencyCount = 1;
 		
 	}
 	
-	public T getKey(){
+	public long getKey(){
 	
 		return key;
 	}
-	public void setkey(T k){
+	
+	public void setkey(long k){
 		
 		key = k;
 			
@@ -27,12 +29,10 @@ public class TreeObject<T> {
 	public void setFrequencyCount(){
 		frequencyCount ++;
 	}
+	
 	public boolean equals(TreeObject k) {
 		
-		if (k.getKey().equals(key)){
-			return true;
-		}
-		return false;
+		return (k.getKey() == key);
 		
 	}
 }

@@ -2,3 +2,7 @@
 /Parser$myQueue.class
 /GeneBankCreateBTree.class
 /TesterBTree.class
+/BTree$BTreeNode.class
+/BTree.class
+/GeneBankSearch.class
+/TreeObject.class
