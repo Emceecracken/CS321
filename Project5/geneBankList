@@ -1,0 +1,35 @@
+LOCUS       NT_086986              34821 bp    DNA     linear   CON 20-AUG-2004
+DEFINITION  Homo sapiens chromosome Y genomic contig, pseudoautosomal region.
+ACCESSION   NT_086986
+VERSION     NT_086986.1  GI:51477809
+KEYWORDS    .
+SOURCE      Homo sapiens
+  ORGANISM  Homo sapiens
+            Eukaryota; Metazoa; Chordata; Craniata; Vertebrata; Euteleostomi;
+            Mammalia; Eutheria; Primates; Catarrhini; Hominidae; Homo.
+REFERENCE   1  (bases 1 to 34821)
+  AUTHORS   International Human Genome Sequencing Consortium.
+  TITLE     The DNA sequence of Homo sapiens
+  JOURNAL   Unpublished (2003)
+COMMENT     GENOME ANNOTATION REFSEQ:  Features on this sequence have been
+            produced for build 35 version 1 of the NCBI's genome annotation
+            [see documentation].
+            The DNA sequence is part of the third release of the finished human
+            reference genome. It was assembled from individual clone sequences
+            by the Human Genome Sequencing Consortium in consultation with NCBI
+            staff.
+            COMPLETENESS: not full length.
+FEATURES             Location/Qualifiers
+     source          1..34821
+                     /organism="Homo sapiens"
+                     /mol_type="genomic DNA"
+                     /db_xref="taxon:9606"
+                     /chromosome="Y"
+                     /clone="XX-87320F9"
+                     /note="Accession BX640545 sequenced by The Sanger Centre"
+ORIGIN
+        1 ctaaccctaa ccctaaccct aaccctaacc ctaaccctct gaaagtggac ctatcagcag
+       61 gatgtgggtg ggagcagatt agagaataaa agcagactgc ctgagccagc agtggcaacc
+
+     //
+     

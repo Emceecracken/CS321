@@ -1,109 +1,104 @@
-import java.io.DataInputStream;
+
+import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Queue;
 
 public class Parser {
 
-	private static final char EOF = 0;
-	//FileInputStream gbf;
-	int length; // length of subsequence
-	Queue geneSave;
-	boolean firstTime;
-	DataInputStream d;
+	private static boolean EOF = false;		// Condition for end of file
+	int length; 							// Length of the gene subsequence
+	myQueue geneSave;						// Queue used for saving the gene sequences
+	boolean firstTime;						// Condition used to skip everything unimportant
+	BufferedReader b;
 
-	public Parser(FileInputStream file, int subLength) {
+	public Parser(BufferedReader in, int subLength) {
 
-		//gbf = file;
-		d = new DataInputStream(file);
+		b = in;								// Initializes all the class variables
 		length = subLength;
-		geneSave = new LinkedList<Character>();
+		geneSave = new myQueue();
 		firstTime = true;
 	}
 
 	String nextSubsequence() {
 
-//		if (firstTime) {
-//			skipHeader();
-//			firstTime = false;
-//		}
+		if (firstTime) {					// Skips the unimportant stuff until "ORIGIN" is found
+			skipHeader();	
+			firstTime = false;
+		}
 
-		char g;
-		String ss = null;
+		char gene;							// Variables used to create the subsequence
+		int geneInt;
+		String ss = "";
 
-		try {
-			while ((g = (char)d.readByte()) != EOF) {
-				checkGene(g);
-				ss = geneSave.toString();
-				if (ss.contains("n") || ss.contains("N")) {
+		try {								// Try-catch for bufferedreader.read()
+			while ((geneInt =  b.read()) != -1) {				// Keeps reading until read() returns -1 (END OF FILE)
+				gene = (char) geneInt;							// Casts the read into a character
+				checkGene(gene);								// Checks if the gene is valid
+				ss = geneSave.getSubsequence();					// Copies the queue into a string
+
+				if (ss.contains("n") || ss.contains("N")) {		// Gets rid of the queue and string if it contains 'n'
 					for (int i = 0; i < ss.length(); i++) {
-						geneSave.remove();
+						geneSave.poll();
+						ss = "";
 					}
 				}
-
-				System.out.println(ss.length());
 				
-				if (ss.length() == length) {
-					geneSave.remove();
+				if (ss.length() == length) {					// Returns the subsequence (ss) if it has the correct length
+					geneSave.poll();							// Removes the head of the queue so that 
 					return ss;
-				}				
+				}
 
 			}
-			d.close();			
+			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		
 		return null;
-
+		
 	}
 
-	String getSubsequence(String k) {
+	void checkGene(char input) {
 
-		String ss = k;
-		return ss;
-	}
+		char check = Character.toLowerCase(input);
 
-	char checkGene(char check) {
-
-		if (check == 'a' || check == 'c' || check == 't' || check == 'g' || check == 'n' || check == 'N') {
+		if (check == 'a' || check == 'c' || check == 't' || check == 'g' || check == 'n') {
 
 			geneSave.add(check);
+			
 		} else if (check == '/') {
 			try {
-				if ((char)d.readByte() == '/') {
-
-					check = EOF;
+				if (b.read() == '/') {
 					firstTime = true;
 				}
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+
 				e.printStackTrace();
 			}
 		}
-		return check;
 
 	}
 
+	//need to check if file starts origin or origin right after //
 	void skipHeader() {
-		char temp;
+
 		try {
-			while((temp = d.readChar()) != EOF){
-				System.out.println(temp);
-				if(temp == 'O'){
-					temp = d.readChar();
-					if(temp == 'R'){
-						temp = d.readChar();
-						if(temp == 'I'){
-							temp = d.readChar();
-							if(temp == 'G'){
-								temp = d.readChar();
-								if(temp == 'I'){
-									temp = d.readChar();
-									if(temp == 'N'){
+			while(b.read() != -1){
+				if(b.read() == 'O'){
+					
+					if(b.read() == 'R'){
+						
+						if(b.read() == 'I'){
+							
+							if(b.read() == 'G'){
+								
+								if(b.read() == 'I'){
+									
+									if(b.read() == 'N'){
+										
 										break;
 									}
 								}
@@ -111,14 +106,37 @@ public class Parser {
 						}
 					}
 				}
-				
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+
 			e.printStackTrace();
 		}
-		
 
+	}
+	
+	public class myQueue extends LinkedList<Character> {
+		
+		public String getSubsequence(){
+			
+			String str = "";
+			
+			Iterator<Character> itr; 
+			itr = geneSave.iterator();
+			
+			int count = 0;
+			
+			while(count < length){
+				
+				if(itr.hasNext()){
+					str += itr.next();
+				}else{
+					break;
+				}
+			}
+			
+			return str;
+			
+		}
 	}
 
 }
