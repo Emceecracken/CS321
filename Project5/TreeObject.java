@@ -35,4 +35,14 @@ public class TreeObject implements Serializable{
 		return (k.getKey() == key);
 		
 	}
+	
+/*	public int compareTo(TreeObject k){
+		
+		if(key < k.getKey()){
+			return -1;
+		}else if(key > k.getKey()){
+			return 1;
+		}else
+			return 0;
+	}*/
 }

@@ -28,7 +28,10 @@ public class GeneBankCreateBTree {
 			
 		}
 		
-		BTree b = new BTree(degree);
+		String BTreeFile = gbf + ".btree.data." + sequenceLength + "." + degree;
+		
+		BTree b = new BTree(degree, BTreeFile);
+		System.out.println(BTreeFile);
 		
 		try{
 			BufferedReader in = new BufferedReader(new FileReader("geneBankList"));
