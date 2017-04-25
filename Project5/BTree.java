@@ -7,6 +7,9 @@ import java.io.ObjectOutputStream;
 import java.io.RandomAccessFile;
 import java.io.Serializable;
 
+import java.io.*;
+import java.lang.*;
+
 public class BTree implements Serializable{
 	
 	private int degree;
@@ -27,14 +30,15 @@ public class BTree implements Serializable{
 		this.degree = degree;
 		this.fileName = fileName;
 				
-		myRoot = new BTreeNode();
-
 		try {
 			bfile = new RandomAccessFile(fileName, "rws");
 			fileSize = bfile.length();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
+		myRoot = new BTreeNode();
+		myRoot.leaf = true;
 		
 	}
 
@@ -46,7 +50,7 @@ public class BTree implements Serializable{
 	 */
 	public void insert(TreeObject obj) throws IOException {
 
-/*		BTreeNode r = myRoot;
+		BTreeNode r = myRoot;
 		
 		if(r.numKeys == 2*degree - 1){ //if r is full
 			BTreeNode s = new BTreeNode();
@@ -54,11 +58,11 @@ public class BTree implements Serializable{
 			s.leaf = false;
 			s.numKeys = 0;
 			s.childrenOffset[0] = r.myFileOffset;
-			split(s,1,r);
+			split(s,0,r); //maybe position 1
 			insertNonFull(s, obj);
 		}else{
 			insertNonFull(r, obj);
-		}*/
+		}
 	}
 	
 	/**
@@ -70,12 +74,12 @@ public class BTree implements Serializable{
 	 */
 	private void split(BTreeNode x, int position, BTreeNode y) {
 		
-	/*	BTreeNode z = new BTreeNode();
+		BTreeNode z = new BTreeNode();
 		z.leaf = y.leaf;
 		
-		z.numKeys = degree -1;
+		z.numKeys = degree - 1;
 		
-		for(int j = 1; j < degree - 1; j++){
+		for(int j = 0; j < degree - 1; j++){ //maybe degree - 2 
 			z.keys[j] = y.keys[j + degree];
 		}
 		
@@ -97,30 +101,29 @@ public class BTree implements Serializable{
 			x.keys[j + 1] = x.keys[j];
 		}
 		
-		x.keys[1] = y.keys[degree];
+		x.keys[position] = y.keys[degree - 1];
 		x.numKeys = x.numKeys + 1;
 		
-		*/
+		
 	}
 
-	public void insertNonFull(BTreeNode r, TreeObject newObj){
+	public void insertNonFull(BTreeNode r, TreeObject newObj) throws IOException{
 		
-	/*	int i = r.numKeys;
+		int i = r.numKeys;
 		if(r.leaf){
-			while(i >= 1 && newObj.getKey() < r.keys[i].getKey()){
-				r.keys[i + 1] = r.keys[i];
+			while(i >= 1 && newObj.getKey() < r.keys[i - 1].getKey()){  //increase freq when keys are equal
+				r.keys[i] = r.keys[i - 1];
 				i = i - 1;
 			}
-			r.keys[i + 1] = newObj;
+			r.keys[i] = newObj; // r.keys[i] = newObj;
 			r.numKeys = r.numKeys + 1;
-			//disk write(r)
+			r.writeNode(r);
 		} else {
 			while(i >= 1 && newObj.getKey() < r.keys[i].getKey()){
 				i = i - 1;
 			}
 			i = i + 1;
-			//child = disk read(r.child[i])
-			BTreeNode child = new BTreeNode();								// 	<------ FIX ME
+			BTreeNode child = r.readNode(r.childrenOffset[i]);
 			if(child.numKeys == 2 * degree -1) {
 				split(r, i, child);
 				if(newObj.getKey() > r.keys[i].getKey()){
@@ -130,12 +133,12 @@ public class BTree implements Serializable{
 			
 			insertNonFull(child, newObj);
 				
-		}*/
+		}
 	}
 
 
 	
-	public class BTreeNode{
+	public class BTreeNode implements Serializable{
 		
 		private TreeObject[] keys;
 		private int numKeys;
@@ -153,25 +156,52 @@ public class BTree implements Serializable{
 			
 			childrenOffset = new long[2*degree];
 			numChildren = 0;
-
+			
 			//Generate file offset when new node is created
+			try {
+				myFileOffset = bfile.length();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+			leaf = true;
 			
 		}
 		
-		public void writeNode(TreeObject obj) throws IOException{
+		public void writeNode(BTreeNode obj) throws IOException{
 			
-			bfile.seek(myFileOffset);
+//			bfile.seek(myFileOffset);
+//			
+//			
+//			ByteArrayOutputStream byt = new ByteArrayOutputStream();
+//			ObjectOutputStream out2 = new ObjectOutputStream(byt);
+//			out2.writeObject(obj);
+//			bfile.write(byt.toByteArray());
 			
-			
-			ByteArrayOutputStream byt = new ByteArrayOutputStream();
-			ObjectOutputStream out2 = new ObjectOutputStream(byt);
-			out2.writeObject(obj);
-			bfile.write(byt.toByteArray());
+			bfile.writeLong(obj.myFileOffset);
 			
 		}
 		
-		public void readNode(){
-			
+		public BTreeNode readNode(long fileOffset){
+
+			byte[] b = new byte[4096];
+			BTreeNode myNode = null;
+			try {
+				bfile.readFully(b, (int)fileOffset, 4096);
+				ByteArrayInputStream test = new ByteArrayInputStream(b);
+				ObjectInputStream in2 = new ObjectInputStream(test);
+				myNode = (BTreeNode) in2.readObject();
+				
+				
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return myNode;
 		}
 			
 	}
