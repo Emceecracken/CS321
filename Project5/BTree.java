@@ -249,6 +249,11 @@ public class BTree implements Serializable{
 			myFileOffset = myOffset;
 			
 		}
+
+		public int getNumKeys() {
+
+			return numKeys;
+		}
 			
 	}
 	
