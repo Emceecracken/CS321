@@ -115,9 +115,9 @@ public class BTree implements Serializable{
 				r.keys[i] = r.keys[i - 1];
 				i = i - 1;
 			}
-			r.keys[i] = newObj; // r.keys[i] = newObj;
+			r.keys[i] = newObj;
 			r.numKeys = r.numKeys + 1;
-			r.writeNode(r);
+			r.writeNode();
 		} else {
 			while(i >= 1 && newObj.getKey() < r.keys[i].getKey()){
 				i = i - 1;
@@ -169,44 +169,88 @@ public class BTree implements Serializable{
 			
 		}
 		
-		public void writeNode(BTreeNode obj) throws IOException{
+		public void writeNode() throws IOException{
 			
-//			bfile.seek(myFileOffset);
-//			
-//			
-//			ByteArrayOutputStream byt = new ByteArrayOutputStream();
-//			ObjectOutputStream out2 = new ObjectOutputStream(byt);
-//			out2.writeObject(obj);
-//			bfile.write(byt.toByteArray());
+			bfile.seek(myFileOffset);
 			
-			bfile.writeLong(obj.myFileOffset);
+			bfile.writeLong(myFileOffset);
 			
+			bfile.writeLong(parentOffset);
+			
+			//Write array of children offsets
+			for(int i = 0; i < 2*degree; i++){
+				bfile.writeLong(childrenOffset[i]); 
+			}
+			
+			// Write array of tree objects
+			for(int i = 0; i < 2*degree - 1; i++){
+				bfile.writeLong(keys[i].getKey());
+				bfile.writeInt(keys[i].getFrequencyCount());
+			}
+						
 		}
 		
-		public BTreeNode readNode(long fileOffset){
+		public BTreeNode readNode(long fileOffset) throws IOException{
 
-			byte[] b = new byte[4096];
-			BTreeNode myNode = null;
-			try {
-				bfile.readFully(b, (int)fileOffset, 4096);
-				ByteArrayInputStream test = new ByteArrayInputStream(b);
-				ObjectInputStream in2 = new ObjectInputStream(test);
-				myNode = (BTreeNode) in2.readObject();
-				
-				
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			BTreeNode myNode = new BTreeNode();
+			
+			bfile.seek(fileOffset);
+			
+			long offset = bfile.readLong();
+			myNode.setMyFileOffset(offset);
+			
+			long parent = bfile.readLong();
+			myNode.setParentOffset(parent);
+			
+			long childOffset;
+			
+			for(int i = 0; i < 2*degree; i++){
+				childOffset = bfile.readLong();
+				myNode.setChildOffset(i, childOffset);
 			}
+			
+			for(int i = 0; i < 2*degree - 1; i++){
+				long key = bfile.readLong();
+				myNode.setTreeObjKey(i, key);
+				
+				int count = bfile.readInt();
+				myNode.setTreeObjFrequency(i, count);
+			}
+			
 			return myNode;
+		}
+
+		private void setTreeObjFrequency(int index, int count) {
+			
+			keys[index].setFrequencyCount(count);
+			
+		}
+
+		private void setTreeObjKey(int index, long key) {
+
+			keys[index].setkey(key);
+			
+		}
+
+		private void setChildOffset(int index, long childOffset) {
+			
+			childrenOffset[index] = childOffset;
+			
+		}
+
+		private void setParentOffset(long parent) {
+
+			parentOffset = parent;
+			
+		}
+
+		private void setMyFileOffset(long myOffset) {
+		
+			myFileOffset = myOffset;
+			
 		}
 			
 	}
-	
-	
 	
 }
 
