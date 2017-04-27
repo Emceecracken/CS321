@@ -11,11 +11,15 @@ public class GeneBankCreateBTree {
 	private static File gbf;
 	private static int sequenceLength;
 	private static int debugLevel;
+	private static int cacheOption;
+	private static int cacheSize;
+	
 	
 	public static void main(String[] args) {
 	
 		if (args.length < 3){
-			System.err.println ("Incorrect number of arguments");
+			System.err.println ("Incorrect number of arguments./n Please enter in format: <degree>"
+					+ "<gbk file> <sequence length> <debug level>");
 			System.exit(0);
 		}
 		if (args.length == 4){
@@ -27,11 +31,20 @@ public class GeneBankCreateBTree {
 			System.out.println(degree + " " + gbf + " " + sequenceLength + " " + debugLevel);
 			
 		}
+		if (args.length == 6){
+			cacheOption = Integer.parseInt(args[0]);
+			degree = Integer.parseInt(args[1]);
+			gbf = new File(args[2]);
+			sequenceLength = Integer.parseInt(args[3]);
+			cacheSize = Integer.parseInt(args[4]);
+			debugLevel = Integer.parseInt(args[5]);
+			
+			System.out.println(degree + " " + gbf + " " + sequenceLength + " " + debugLevel);
+		}
 		
 		String BTreeFile = gbf + ".btree.data." + sequenceLength + "." + degree;
 		
 		BTree b = new BTree(degree, BTreeFile);
-		System.out.println(BTreeFile);
 		
 		try{
 			BufferedReader in = new BufferedReader(new FileReader("geneBankList"));
@@ -44,6 +57,8 @@ public class GeneBankCreateBTree {
 				long key;
 				key = stringToKey(str);
 				TreeObject newObj = new TreeObject(key);
+				
+				
 				b.insert(newObj);
 				
 			//	System.out.println(key + "  " + str);
@@ -52,6 +67,7 @@ public class GeneBankCreateBTree {
 			e.printStackTrace();
 
 		}
+		//write text file "dump"  <frequency> <DNA String> in an inorder traversal
 
 	}
 

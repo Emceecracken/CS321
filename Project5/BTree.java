@@ -30,9 +30,12 @@ public class BTree implements Serializable{
 		this.degree = degree;
 		this.fileName = fileName;
 				
+		
 		try {
+			//need to delete file 
 			bfile = new RandomAccessFile(fileName, "rws");
 			fileSize = bfile.length();
+			System.out.println(fileSize);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -63,6 +66,7 @@ public class BTree implements Serializable{
 		}else{
 			insertNonFull(r, obj);
 		}
+		
 	}
 	
 	/**
@@ -71,16 +75,18 @@ public class BTree implements Serializable{
 	 * @param x parent of full node
 	 * @param position
 	 * @param y full node
+	 * @throws IOException 
 	 */
-	private void split(BTreeNode x, int position, BTreeNode y) {
+	private void split(BTreeNode x, int position, BTreeNode y) throws IOException {
 		
 		BTreeNode z = new BTreeNode();
 		z.leaf = y.leaf;
 		
 		z.numKeys = degree - 1;
 		
-		for(int j = 0; j < degree - 1; j++){ //maybe degree - 2 
+		for(int j = 0; j < degree - 1; j++){ 
 			z.keys[j] = y.keys[j + degree];
+			y.keys[j + degree] = null;
 		}
 		
 		if(!y.leaf){
@@ -102,28 +108,49 @@ public class BTree implements Serializable{
 		}
 		
 		x.keys[position] = y.keys[degree - 1];
+		y.keys[degree - 1] = null;
 		x.numKeys = x.numKeys + 1;
 		
+		y.writeNode();
+		z.writeNode();
+		x.writeNode();
 		
 	}
 
 	public void insertNonFull(BTreeNode r, TreeObject newObj) throws IOException{
 		
+/*		int j = r.numKeys;
+		
+		while(j >= 1){  //increase frequency if keys are equal
+			if(newObj.getKey() == r.keys[j - 1].getKey()){
+				r.keys[j-1].increaseFrequencyCount();
+				r.writeNode();
+				return;
+			}
+			j = j - 1;
+		}*/
+		
 		int i = r.numKeys;
+		
 		if(r.leaf){
+			
 			while(i >= 1 && newObj.getKey() < r.keys[i - 1].getKey()){  //increase freq when keys are equal
 				r.keys[i] = r.keys[i - 1];
 				i = i - 1;
 			}
+					
 			r.keys[i] = newObj;
 			r.numKeys = r.numKeys + 1;
 			r.writeNode();
+			
+			System.out.println("My file offset: " + r.myFileOffset);
 		} else {
-			while(i >= 1 && newObj.getKey() < r.keys[i].getKey()){
+			while(i >= 1 && newObj.getKey() < r.keys[i - 1].getKey()){
 				i = i - 1;
 			}
-			i = i + 1;
+		//	i = i + 1;
 			BTreeNode child = r.readNode(r.childrenOffset[i]);
+		//	System.out.println(child.numKeys);
 			if(child.numKeys == 2 * degree -1) {
 				split(r, i, child);
 				if(newObj.getKey() > r.keys[i].getKey()){
@@ -177,13 +204,15 @@ public class BTree implements Serializable{
 			
 			bfile.writeLong(parentOffset);
 			
+			bfile.writeInt(numKeys);
+			
 			//Write array of children offsets
 			for(int i = 0; i < 2*degree; i++){
 				bfile.writeLong(childrenOffset[i]); 
 			}
 			
 			// Write array of tree objects
-			for(int i = 0; i < 2*degree - 1; i++){
+			for(int i = 0; i < numKeys - 1; i++){
 				bfile.writeLong(keys[i].getKey());
 				bfile.writeInt(keys[i].getFrequencyCount());
 			}
@@ -202,20 +231,30 @@ public class BTree implements Serializable{
 			long parent = bfile.readLong();
 			myNode.setParentOffset(parent);
 			
+			int numKeys = bfile.readInt();
+			myNode.numKeys = numKeys;
+			
 			long childOffset;
 			
 			for(int i = 0; i < 2*degree; i++){
 				childOffset = bfile.readLong();
 				myNode.setChildOffset(i, childOffset);
 			}
-			
+						
 			for(int i = 0; i < 2*degree - 1; i++){
 				long key = bfile.readLong();
-				myNode.setTreeObjKey(i, key);
-				
 				int count = bfile.readInt();
-				myNode.setTreeObjFrequency(i, count);
+				
+				TreeObject newObj = new TreeObject(key);
+				newObj.setFrequencyCount(count);
+				
+								
+				myNode.keys[i] = newObj;
 			}
+			
+			System.out.println("Read in node- file offset: " + myFileOffset + ", numKeys: " + numKeys);
+			
+		//	myNode.numKeys = 
 			
 			return myNode;
 		}
@@ -228,6 +267,7 @@ public class BTree implements Serializable{
 
 		private void setTreeObjKey(int index, long key) {
 
+			
 			keys[index].setkey(key);
 			
 		}
