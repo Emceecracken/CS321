@@ -1,0 +1,105 @@
+oroject 5
+CS 321
+4/28/17
+Marie Williford
+Shaun McCracken
+Maria Paquin
+
+
+OVERVIEW:
+
+Create a BTree data structure to hold a large amount of genetic data read from a file and be able to search it for
+matching data subsequences of an entered length.
+
+
+
+INCLUDED FILES:
+
+BTree.java:  source file
+Cache.java: source file
+GeneBankCreateBTree.java: source file
+GeneBankSearch.java: source file
+Parser.java: source file
+TreeObject.java: source file
+README:  this file
+
+
+COMPILING AND RUNNING:
+
+From the directory containing all source files, compile the driver
+class (and all dependencies) with the command:
+
+javac GeneBankCreateBTree.java
+
+javac GeneBankSearch.java
+
+Run the compiled class file with the command:
+
+java GeneBankCreateBTree <degree> <gbk file> <sequence length> <debug level>
+java GeneBankSearch <btree file> <query file> <debug level>
+
+or to run with a cache option:
+
+java GeneBankCreateBTree <0/1(no/with Cache)> <degree> <gbk file> <sequence length>
+<cache size> <debug level>
+
+java GeneBankSearch <0/1(no/with Cache)> <btree file> <query file> <cache size> <debug level>
+
+
+PROGRAM DESIGN AND IMPORTANT CONCEPTS:
+
+TreeObject Class:  creates an object that holds the key and the frequency count
+
+Cache Class:  creates a cache
+
+BTree Class:  holds the constructor for the BTree and the BTreeNode and methods to insert
+			  the BTreeNodes into the BTree and other helper methods
+			  
+Parser Class: Reads in the file and parses it for the genetic data, grouped together as subsequences
+			  and those subsequences and made binary as keys to be inserted into the TreeObjects that are
+			  put into the BTreeNodes using helper methods.
+			  
+GeneBankCreateBTree: reads in arguments that are used to create an instance of a BTree.  Can be used to
+			  run with or without a cache.
+
+GeneBankSearch: searches the BTree file for a particular query string and returns the frequency of the 
+			    of the occurrence of the query string or the value 0 if not found.
+		      
+			  
+
+TESTING:
+
+Used a short test program to make sure that we could read in the data properly and created a short gene bank 
+list for the short test program and subsequent testing of the other classes to help us weed out problems.
+
+We are seeing an issue of EOF exception from reading from disk and are researching for causes.
+
+Also after some testing, we saw that our offsets were not starting at zero and after talking to Dr. Cutchin, we
+think we have solved that issue.
+
+We used print statements and debugging to try and narrow down the possibilities of off by one issues and see if
+we were storing and reading objects correctly.
+
+
+DISCUSSION:
+
+This project was very challenging. We used our class textbook's pseudocode for the project which seemed very clear
+and helped immensely with setting up our methods for insert and search.
+
+Our project currently can read in a gbk file, parse it correctly, and create the proper objects.  We think we are 
+writing the nodes to disk properly, but we are not reading from the disk properly which affects our ability to 
+insert the BTreeNodes into the tree.
+
+We first had some trouble trying to turn the subsequences into binary and ended up using bit shifting to achieve 
+that part of the assignment.
+
+We struggled with trying to figure out how to write and read the nodes to disk and we first thought we needed to write the
+whole node object by turning it all into bytes which we found to be very difficult, but we learned that that was 
+not necessary.
+
+All of the classes needed for the implementation of this project are created. The TreeObject and Parser classes
+are working.  Parts of the BTree and GeneBankCreateBTree classes are working.
+
+We also have not implemented the cache function, though we have some coding in place for it.  We have the 
+GeneBankSearch class written, but we are not at the stage to test it currently.
+
